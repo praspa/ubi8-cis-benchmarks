@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secure-image-nodejs-16-pr-
+spec:
+  pipelineRef:
+    name: secure-image-pipeline-nodejs-16
+  resources:
+    - name: source
+      resourceRef:
+        name: dockerfiles
+    - name: image-nodejs-cache
+      resourceRef:
+        name: image-nodejs-cache
+    - name: image-nodejs-internal-registry
+      resourceRef:
+        name: image-nodejs-internal-registry
+    - name: image-nodejs-quay
+      resourceRef:
+        name: image-nodejs-quay
+  params:
+    - name: LOCAL_REGISTRY_URL
+      value: "hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure"
+    - name: CENTRAL_URL
+      value: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: commit_id
+      value: ""
+    - name: IMAGE_URL_NODEJS_16
+      value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/nodejs-16:1-72'
+    - name: TEST_IMAGE_URL_NODEJS_16
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_nodejs-16:1-72.cis0001'
+

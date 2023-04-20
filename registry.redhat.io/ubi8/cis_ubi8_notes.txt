@@ -1,0 +1,54 @@
+# CIS RHEL8 Discussion
+
+# Not Applicable
+1.1.2 - NA RHCOS compute node or containers do not mount /tmp from separate partition by design
+1.1.3 - NA RHCOS compute node or containers do not mount /tmp from separate partition by design
+1.1.4 - NA RHCOS compute node or containers do not mount /tmp from separate partition by design
+1.1.5 - NA RHCOS compute node or containers do not mount /tmp from separate partition by design
+1.1.6 - A RHCOS compute node or containers do not mount /var from separate partition by design
+1.1.7 - A RHCOS compute node or containers do not mount /var/tmp from separate partition by design
+1.1.8 - A RHCOS compute node or containers do not mount /var/tmp from separate partition by design
+1.1.9 - A RHCOS compute node or containers do not mount /var/tmp from separate partition by design
+1.1.10 - A RHCOS compute node or containers do not mount /var/tmp from separate partition by design
+1.1.11 - A RHCOS compute node or containers do not mount /var/log from separate partition by design
+1.1.12 - A RHCOS compute node or containers do not mount /var/log/audit from separate partition by design
+1.1.13 - A RHCOS compute node or containers do not mount /home from separate partition by design
+1.1.14 - A RHCOS compute node or containers do not mount /home from separate partition by design
+1.2.1 - subscription manager status is not applicable in container at runtime
+1.11 - /etc/crypto-policies/config is DEFAULT needs to be FUTURE or FIPS - Org does not have a requirement for FIPS
+
+2.2.1.1 - time sync - ntp configured at node mco level not at pod level, pods inherit time from compute node
+
+4.1.1.1 - auditd and auditd-libs installed on ocp4 rhcos node - auditd running on host node
+
+6.1.12 - false finding - secrets mounts with dynamic gid are okay
+
+# Findings
+
+1.1.21 - fixed, but seems like 8.6 to 8.7 they removed sticky bit from /tmp and /var/tmp.
+
+1.6.1 - limits.conf - ensure core dumps are restricted
+  https://access.redhat.com/solutions/6243491. Pods confined by the ulimit of crio.
+  https://cloud.redhat.com/blog/a-guide-to-core-dump-handling-in-openshift  - probably needs to be a config change to worker nodes
+
+  this might be update the audit check to $ cat /proc/sys/fs/suid_dumpable and ensure 0
+
+3.1.2 - ensure packet redirect is disabled 0 - inherited from worker node - guessing this is per sdn design
+  cat /proc/sys/net/ipv4/conf/all/send_redirects is 1
+
+3.2.2 - accept_redirects - control says 0 - inherited from worker node - guessing this is per sdn design
+  cat /proc/sys/net/ipv4/conf/default/accept_redirects = 1
+  cat /proc/sys/net/ipv6/conf/default/accept_redirects = 1
+
+3.2.3 - secure_redirects - control says 0 - inherited from worker node - guessing this is per sdn design
+  cat /proc/sys/net/ipv4/conf/default/secure_redirects = 1
+
+3.2.4 - log_martians - needs to be 1  - inherited from worker node
+  cat /proc/sys/net/ipv4/conf/all/log_martians = 0 
+
+3.2.9 -  system is 1 , control calls for disable 0 
+  cat proc/sys/net/ipv6/conf/default/accept_ra = 1
+
+3.6 - disable ipv6 at ocp4 level - https://access.redhat.com/solutions/5513111 - not sure we want to do this
+
+5.5.5 - set global 027 umask will probably break container design (s2i scripts etc)

@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: dockerfiles
+spec:
+  params:
+  - name: url
+    value: git@gitlab.example.com:ocpv4/dockerfiles.git
+  - name: revision
+    value: main
+  type: git

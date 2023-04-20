@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secure-image-ubi8-devtools-pr-
+spec:
+  pipelineRef:
+    name: secure-image-pipeline-ubi8-devtools
+  resources:
+    - name: source
+      resourceRef:
+        name: dockerfiles
+    - name: image-ubi8-devtools-cache
+      resourceRef:
+        name: image-ubi8-devtools-cache
+    - name: image-ubi8-devtools-internal-registry
+      resourceRef:
+        name: image-ubi8-devtools-internal-registry
+    - name: image-ubi8-devtools-quay
+      resourceRef:
+        name: image-ubi8-devtools-quay
+  params:
+    - name: LOCAL_REGISTRY_URL
+      value: "hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure"
+    - name: CENTRAL_URL
+      value: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: commit_id
+      value: ""
+    - name: IMAGE_URL_UBI8_DEVTOOLS
+      value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/ubi:8.7-1037'
+    - name: TEST_IMAGE_URL_UBI8_DEVTOOLS
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/devtools:1.0'
+

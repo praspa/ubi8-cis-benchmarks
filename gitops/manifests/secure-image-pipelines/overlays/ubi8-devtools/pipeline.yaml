@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    pipeline.openshift.io/type: kubernetes
+  name: secure-image-pipeline-ubi8-devtools
+spec:
+  resources:
+  - name: source
+    type: git
+  - name: image-ubi8-devtools-cache
+    type: image
+  - name: image-ubi8-devtools-internal-registry
+    type: image
+  - name: image-ubi8-devtools-quay
+    type: image
+  params:
+  - name: STORAGE_DRIVER
+    type: string
+    default: vfs
+  - name: MAX_PER_REGISTRY
+    type: string
+    default: '12'
+  - name: LOCAL_REGISTRY_URL
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure'
+  - name: CENTRAL_URL
+    type: string
+    default: 'central-stackrox.apps.hub.test.example.com:443'
+  - name: IMAGE_URL_UBI8_DEVTOOLS
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/ubi:8.7-1037'
+  - name: TEST_IMAGE_URL_UBI8_DEVTOOLS
+    type: string
+    default: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/devtools:1.0'
+  - name: commit_id
+    type: string
+  tasks:
+  - name: build-ubi8-devtools
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+      - name: commit_id
+        value: $(params.commit_id)
+      - name: dockerfile_sub_path
+        value: "example/ubi8-devtools/Dockerfile"
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-ubi8-devtools-cache
+      - name: internal-registry-image
+        resource: image-ubi8-devtools-internal-registry
+    taskRef:
+      kind: Task
+      name: build
+  - name: acs-scan-custom-ubi8-devtools
+    params:
+      - name: IMAGE_URL
+        value: $(params.TEST_IMAGE_URL_UBI8_DEVTOOLS)
+      - name: CENTRAL_URL
+        value: $(params.CENTRAL_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: acs-scan
+    runAfter:
+      - build-ubi8-devtools
+  - name: push-quay
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-ubi8-devtools-cache
+      - name: quay-image
+        resource: image-ubi8-devtools-quay
+    taskRef:
+      kind: Task
+      name: quay-push
+    runAfter:
+      - acs-scan-custom-ubi8-devtools
+  finally:
+  - name: clear-buildah-repo-end
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    taskRef:
+      kind: Task
+      name: clear-buildah-repo
+

@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../../base
+
+resources:
+- image-ubi8-devtools-cache-resource.yaml
+- image-ubi8-devtools-internal-registry-resource.yaml
+- image-ubi8-devtools-quay-resource.yaml
+- pipeline.yaml
+
+
+

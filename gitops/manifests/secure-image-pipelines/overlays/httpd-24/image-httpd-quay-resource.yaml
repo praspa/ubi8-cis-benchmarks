@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-httpd-quay
+spec:
+  params:
+  - name: url
+    value: hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/safr_redhat_ubi8_httpd-24:1-209.cis0001
+  type: image 

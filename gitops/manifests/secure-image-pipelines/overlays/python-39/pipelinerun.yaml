@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secure-image-python-39-pr-
+spec:
+  pipelineRef:
+    name: secure-image-pipeline-python-39
+  resources:
+    - name: source
+      resourceRef:
+        name: dockerfiles
+    - name: image-python-cache
+      resourceRef:
+        name: image-python-cache
+    - name: image-python-internal-registry
+      resourceRef:
+        name: image-python-internal-registry
+    - name: image-python-quay
+      resourceRef:
+        name: image-python-quay
+  params:
+    - name: LOCAL_REGISTRY_URL
+      value: "hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure"
+    - name: CENTRAL_URL
+      value: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: commit_id
+      value: ""
+    - name: IMAGE_URL_PYTHON_39
+      value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/python-39:1-67'
+    - name: TEST_IMAGE_URL_PYTHON_39
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_python-39:1-67.cis0001'
+

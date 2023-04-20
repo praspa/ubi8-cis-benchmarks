@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-nodejs-quay
+spec:
+  params:
+  - name: url
+    value: hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/safr_redhat_ubi8_nodejs-16:1-72.cis0001
+  type: image 

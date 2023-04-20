@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-python-internal-registry
+spec:
+  params:
+  - name: url
+    value: image-registry.openshift-image-registry.svc:5000/pwr-pipeline/safr_redhat_ubi8_python-39:1-67.cis0001
+  type: image 

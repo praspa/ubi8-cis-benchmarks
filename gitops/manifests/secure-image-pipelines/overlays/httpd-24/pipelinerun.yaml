@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secure-image-httpd-24-pr-
+spec:
+  pipelineRef:
+    name: secure-image-pipeline-httpd-24
+  resources:
+    - name: source
+      resourceRef:
+        name: dockerfiles
+    - name: image-httpd-cache
+      resourceRef:
+        name: image-httpd-cache
+    - name: image-httpd-internal-registry
+      resourceRef:
+        name: image-httpd-internal-registry
+    - name: image-httpd-quay
+      resourceRef:
+        name: image-httpd-quay
+  params:
+    - name: LOCAL_REGISTRY_URL
+      value: "hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure"
+    - name: CENTRAL_URL
+      value: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: commit_id
+      value: ""
+    - name: IMAGE_URL_HTTPD_24
+      value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/httpd-24:1-209'
+    - name: TEST_IMAGE_URL_HTTPD_24
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_httpd-24:1-209.cis0001'
+

@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: secure-image-pr-
+spec:
+  pipelineRef:
+    name: secure-image-pipeline
+  resources:
+    - name: source
+      resourceRef:
+        name: dockerfiles
+    - name: image-tomcat-cache
+      resourceRef:
+        name: image-tomcat-cache
+    - name: image-tomcat-internal-registry
+      resourceRef:
+        name: image-tomcat-internal-registry
+    - name: image-tomcat-quay
+      resourceRef:
+        name: image-tomcat-quay
+  params:
+    - name: LOCAL_REGISTRY_URL
+      value: "hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure"
+    - name: CENTRAL_URL
+      value: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: commit_id
+      value: ""
+    - name: IMAGE_URL_TOMCAT_OPENJDK11
+      value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/jboss-webserver-5/jws56-openjdk11-openshift-rhel8:5.6.2-10'
+    - name: TEST_IMAGE_URL_TOMCAT_OPENJDK11
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_jboss-webserver-5_jws56-openjdk11-openshift-rhel8:5.6.2-10.cis0001'
+

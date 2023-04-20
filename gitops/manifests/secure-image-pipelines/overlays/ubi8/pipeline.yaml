@@ -1,0 +1,119 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    pipeline.openshift.io/type: kubernetes
+  name: secure-image-pipeline-ubi8
+spec:
+  resources:
+  - name: source
+    type: git
+  - name: image-ubi8-cache
+    type: image
+  - name: image-ubi8-internal-registry
+    type: image
+  - name: image-ubi8-quay
+    type: image
+  params:
+  - name: STORAGE_DRIVER
+    type: string
+    default: vfs
+  - name: MAX_PER_REGISTRY
+    type: string
+    default: '12'
+  - name: LOCAL_REGISTRY_URL
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure'
+  - name: CENTRAL_URL
+    type: string
+    default: 'central-stackrox.apps.hub.test.example.com:443'
+  - name: IMAGE_URL_UBI8
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/ubi:8.7-1037'
+  - name: TEST_IMAGE_URL_UBI8
+    type: string
+    default: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_ubi:8.7-1037.cis0001'
+  - name: commit_id
+    type: string
+  tasks:
+  - name: mirror
+    params:
+      - name: LOCAL_REGISTRY_URL
+        value: $(params.LOCAL_REGISTRY_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: mirror
+  - name: acs-scan-ubi8
+    params:
+      - name: IMAGE_URL
+        value: $(params.IMAGE_URL_UBI8)
+      - name: CENTRAL_URL
+        value: $(params.CENTRAL_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: acs-scan
+    runAfter:
+      - mirror
+  - name: build-ubi8
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+      - name: commit_id
+        value: $(params.commit_id)
+      - name: dockerfile_sub_path
+        value: "registry.redhat.io/ubi8/Dockerfile"
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-ubi8-cache
+      - name: internal-registry-image
+        resource: image-ubi8-internal-registry
+    taskRef:
+      kind: Task
+      name: build
+    runAfter:
+      - acs-scan-ubi8
+  - name: acs-scan-custom-ubi8
+    params:
+      - name: IMAGE_URL
+        value: $(params.TEST_IMAGE_URL_UBI8)
+      - name: CENTRAL_URL
+        value: $(params.CENTRAL_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: acs-scan
+    runAfter:
+      - build-ubi8
+  - name: push-quay
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-ubi8-cache
+      - name: quay-image
+        resource: image-ubi8-quay
+    taskRef:
+      kind: Task
+      name: quay-push
+    runAfter:
+      - acs-scan-custom-ubi8
+  finally:
+  - name: clear-buildah-repo-end
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    taskRef:
+      kind: Task
+      name: clear-buildah-repo
+

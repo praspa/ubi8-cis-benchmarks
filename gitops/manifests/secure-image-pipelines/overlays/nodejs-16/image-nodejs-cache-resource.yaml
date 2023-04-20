@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-nodejs-cache
+spec:
+  params:
+  - name: url
+    value: image-nodejs-cache
+  type: image

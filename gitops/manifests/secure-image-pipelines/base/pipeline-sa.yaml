@@ -1,0 +1,8 @@
+apiVersion: v1
+imagePullSecrets:
+kind: ServiceAccount
+metadata:
+  name: pipeline
+secrets:
+- name: quay-secret
+- name: ssh-key

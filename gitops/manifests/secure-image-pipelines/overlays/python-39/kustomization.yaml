@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../../base
+
+resources:
+- image-python-cache-resource.yaml
+- image-python-internal-registry-resource.yaml
+- image-python-quay-resource.yaml
+- pipeline.yaml
+
+
+

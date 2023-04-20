@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-ubi8-devtools-quay
+spec:
+  params:
+  - name: url
+    value: hub-registry-quay-quay-enterprise.apps.hub.test.example.com/example/devtools:1.0
+  type: image 

@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: acs-scan
+spec:
+  params:
+    - name: CENTRAL_URL
+      description: ACS Central URL
+      type: string
+      default: 'central-stackrox.apps.hub.test.example.com:443'
+    - name: IMAGE_URL
+      description: URL of the image to scan
+      type: string
+      default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/rhel8/mariadb-105:1-73'
+  resources:
+  steps :
+    - name: acs-scan
+      onError: continue
+      command:
+        - bash
+        - '/stackrox_scan_image.sh'
+        - "$(params.CENTRAL_URL)"
+        - "$(params.IMAGE_URL)"
+      image: image-registry.openshift-image-registry.svc:5000/example/ocp-developer-tools:1.0.0
+      env:
+        - name: ACS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: ACS_PASSWORD
+              name: acs-secret
+        - name: CVSS_THRESHOLD
+          value: "7.0"
+      volumeMounts:
+        - name: scan-script-cm
+          mountPath: /stackrox_scan_image.sh
+          subPath: stackrox_scan_image.sh
+      workingDir: /workspace/source
+  volumes:
+    - name: acs-secret
+      secret:
+        secretName: acs-secret
+    - name: scan-script-cm
+      configMap:
+        name: scan-script-cm

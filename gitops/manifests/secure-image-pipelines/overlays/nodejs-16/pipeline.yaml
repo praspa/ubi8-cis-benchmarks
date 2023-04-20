@@ -1,0 +1,119 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    pipeline.openshift.io/type: kubernetes
+  name: secure-image-pipeline-nodejs-16
+spec:
+  resources:
+  - name: source
+    type: git
+  - name: image-nodejs-cache
+    type: image
+  - name: image-nodejs-internal-registry
+    type: image
+  - name: image-nodejs-quay
+    type: image
+  params:
+  - name: STORAGE_DRIVER
+    type: string
+    default: vfs
+  - name: MAX_PER_REGISTRY
+    type: string
+    default: '12'
+  - name: LOCAL_REGISTRY_URL
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure'
+  - name: CENTRAL_URL
+    type: string
+    default: 'central-stackrox.apps.hub.test.example.com:443'
+  - name: IMAGE_URL_NODEJS_16
+    type: string
+    default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/nodejs-16:1-72'
+  - name: TEST_IMAGE_URL_NODEJS_16
+    type: string
+    default: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_nodejs-16:1-72.cis0001'
+  - name: commit_id
+    type: string
+  tasks:
+  - name: mirror
+    params:
+      - name: LOCAL_REGISTRY_URL
+        value: $(params.LOCAL_REGISTRY_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: mirror
+  - name: acs-scan-nodejs
+    params:
+      - name: IMAGE_URL
+        value: $(params.IMAGE_URL_NODEJS_16)
+      - name: CENTRAL_URL
+        value: $(params.CENTRAL_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: acs-scan
+    runAfter:
+      - mirror
+  - name: build-nodejs
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+      - name: commit_id
+        value: $(params.commit_id)
+      - name: dockerfile_sub_path
+        value: "registry.redhat.io/nodejs-16/Dockerfile"
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-nodejs-cache
+      - name: internal-registry-image
+        resource: image-nodejs-internal-registry
+    taskRef:
+      kind: Task
+      name: build
+    runAfter:
+      - acs-scan-nodejs
+  - name: acs-scan-custom-nodejs
+    params:
+      - name: IMAGE_URL
+        value: $(params.TEST_IMAGE_URL_NODEJS_16)
+      - name: CENTRAL_URL
+        value: $(params.CENTRAL_URL)
+    resources:
+    taskRef:
+      kind: Task
+      name: acs-scan
+    runAfter:
+      - build-nodejs
+  - name: push-quay
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    resources:
+      inputs:
+      - name: source
+        resource: source
+      outputs:
+      - name: cache-image
+        resource: image-nodejs-cache
+      - name: quay-image
+        resource: image-nodejs-quay
+    taskRef:
+      kind: Task
+      name: quay-push
+    runAfter:
+      - acs-scan-custom-nodejs
+  finally:
+  - name: clear-buildah-repo-end
+    params:
+      - name: STORAGE_DRIVER
+        value: $(params.STORAGE_DRIVER)
+    taskRef:
+      kind: Task
+      name: clear-buildah-repo
+

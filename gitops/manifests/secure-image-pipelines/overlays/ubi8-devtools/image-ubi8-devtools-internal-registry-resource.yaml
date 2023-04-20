@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-ubi8-devtools-internal-registry
+spec:
+  params:
+  - name: url
+    value: image-registry.openshift-image-registry.svc:5000/pwr-pipeline/devtools:1.0
+  type: image 
+

@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: quay-push
+spec:
+  params:
+    - name: TLSVERIFY
+      description: Verify the TLS on the registry endpoint
+      type: string
+      default: 'false'
+    - name: STORAGE_DRIVER
+      description: The Buildah storage STORAGE_DRIVER
+      type: string
+  resources:
+    inputs:
+      - name: source
+        type: git
+    outputs:
+      - name: cache-image
+        type: image
+      - name: quay-image
+        type: image
+  steps:
+    - name: push-quay
+      command:
+        - buildah
+        - push
+        - '--storage-driver=$(params.STORAGE_DRIVER)'
+        - '--tls-verify=$(params.TLSVERIFY)'
+        - '--authfile'
+        - '/etc/secret-volume/config.json'
+        - $(resources.outputs.cache-image.url)
+        - 'docker://$(resources.outputs.quay-image.url)'
+      image: registry.redhat.io/rhel8/buildah
+      resources: {}
+      volumeMounts:
+        - name: pipeline-cache
+          mountPath: /var/lib/containers
+        - name: quay-secret
+          mountPath: /etc/secret-volume
+          readOnly: true
+  volumes:
+    - name: quay-secret
+      secret:
+        secretName: quay-secret       
+    - name: pipeline-cache
+      persistentVolumeClaim:
+        claimName: pipeline-task-cache-pvc

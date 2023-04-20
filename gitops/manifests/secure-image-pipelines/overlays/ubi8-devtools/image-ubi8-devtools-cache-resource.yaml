@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-ubi8-devtools-cache
+spec:
+  params:
+  - name: url
+    value: image-ubi8-devtools-cache
+  type: image
