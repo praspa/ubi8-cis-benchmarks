@@ -32,7 +32,7 @@ spec:
     default: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/httpd-24:1-209'
   - name: TEST_IMAGE_URL_HTTPD_24
     type: string
-    default: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_httpd-24:1-209.cis0001'
+    default: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/cis_redhat_ubi8_httpd-24:1-209.cis0001'
   - name: commit_id
     type: string
   tasks:

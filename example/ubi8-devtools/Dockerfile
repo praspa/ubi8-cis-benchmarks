@@ -1,4 +1,4 @@
-FROM hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/safr_redhat_ubi8_ubi:8.7-1037.cis0001
+FROM hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/cis_redhat_ubi8_ubi:8.7-1037.cis0001
 
 # USER root runs the commands after it as the user root
 USER root

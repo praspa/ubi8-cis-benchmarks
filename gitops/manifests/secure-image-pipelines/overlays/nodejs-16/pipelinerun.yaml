@@ -28,5 +28,5 @@ spec:
     - name: IMAGE_URL_NODEJS_16
       value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/nodejs-16:1-72'
     - name: TEST_IMAGE_URL_NODEJS_16
-      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_nodejs-16:1-72.cis0001'
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/cis_redhat_ubi8_nodejs-16:1-72.cis0001'
 

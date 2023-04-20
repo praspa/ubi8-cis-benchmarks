@@ -28,5 +28,5 @@ spec:
     - name: IMAGE_URL_PYTHON_39
       value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/python-39:1-67'
     - name: TEST_IMAGE_URL_PYTHON_39
-      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_python-39:1-67.cis0001'
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/cis_redhat_ubi8_python-39:1-67.cis0001'
 

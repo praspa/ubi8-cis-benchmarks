@@ -5,5 +5,5 @@ metadata:
 spec:
   params:
   - name: url
-    value: hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/safr_redhat_ubi8_httpd-24:1-209.cis0001
+    value: hub-registry-quay-quay-enterprise.apps.hub.test.example.com/cissecure/cis_redhat_ubi8_httpd-24:1-209.cis0001
   type: image 

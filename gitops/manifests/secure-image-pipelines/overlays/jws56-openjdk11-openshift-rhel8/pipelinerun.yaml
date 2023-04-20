@@ -28,5 +28,5 @@ spec:
     - name: IMAGE_URL_TOMCAT_OPENJDK11
       value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/jboss-webserver-5/jws56-openjdk11-openshift-rhel8:5.6.2-10'
     - name: TEST_IMAGE_URL_TOMCAT_OPENJDK11
-      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_jboss-webserver-5_jws56-openjdk11-openshift-rhel8:5.6.2-10.cis0001'
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/cis_redhat_jboss-webserver-5_jws56-openjdk11-openshift-rhel8:5.6.2-10.cis0001'
 

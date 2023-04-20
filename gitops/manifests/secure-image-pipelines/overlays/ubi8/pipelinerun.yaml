@@ -29,5 +29,5 @@ spec:
     - name: IMAGE_URL_UBI8
       value: 'hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/ubi:8.7-1037'
     - name: TEST_IMAGE_URL_UBI8
-      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/safr_redhat_ubi8_ubi:8.7-1037.cis0001'
+      value: 'default-route-openshift-image-registry.apps.hub.test.example.com/pwr-pipeline/cis_redhat_ubi8_ubi:8.7-1037.cis0001'
 
