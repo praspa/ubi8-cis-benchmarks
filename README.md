@@ -101,6 +101,36 @@ python run_benchmark.py -i ./benchmark/tomcat9/cis_tomcat9.json \
    * For example, to run all of the checks under 1.1.x , use -x "1.1"
    * Or to run a specific check only,  -x "1.2.2.1"
 
+## Build on OCP
+
+```
+# cd to base of of git repo
+
+oc new-project pwr-ubi8-cis
+
+cat ./registry.redhat.io/ubi8/Dockerfile | oc new-build --dockerfile=- --name=ubi8-cis
+
+# wait for build to fail as dockerfile has references to files in local env that are missing from build context
+
+oc start-build ubi8-cis --from-dir=.
+
+Uploading directory "." as binary input for the build ...
+
+Uploading finished
+build.build.openshift.io/ubi8-cis-2 started
+
+# verify build completes
+oc get pods
+NAME               READY   STATUS      RESTARTS   AGE
+...
+ubi8-cis-4-build   0/1     Completed   0          77s
+
+# inspect the audit in pod logs
+oc logs ubi8-cis-4-build | less
+
+
+```
+
 ## Dockerfile artifacts for CIS secure container images
 
 * https://catalog.redhat.com/software/containers/search

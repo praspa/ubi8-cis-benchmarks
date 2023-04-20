@@ -1,7 +1,15 @@
-#!/bin/
+#!/bin/bash
 
 # 1.1.21 sticky bit on world write directories
 chmod 1777 /tmp/ /var/tmp
+
+# Permissions on Warning banner files - 1.8.1.4, 1.8.1.5, 1.8.1.6
+chown root:root /etc/issue
+chmod 644 /etc/issue
+chown root:root /etc/motd
+chmod 644 /etc/motd
+chown root:root /etc/issue.net
+chmod 644 /etc/issue.net
 
 # 4.2.3 - Ensure permissions on all logfiles are configured
 chmod 640 /var/log/dnf.librepo.log /var/log/dnf.log /var/log/dnf.rpm.log /var/log/hawkey.log /var/log/rhsm/rhsm.log

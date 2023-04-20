@@ -1,4 +1,4 @@
-FROM hub-registry-quay-quay-enterprise.apps.hub.test.example.com/ocpv4-stage/cissecure/ubi8/ubi:8.7-1037
+FROM registry.redhat.io/ubi8/ubi:8.7-1037
 
 USER root
 
@@ -10,6 +10,8 @@ COPY benchmark/run_benchmark.py /opt/benchmark/
 COPY benchmark/ubi8/ /opt/benchmark/
 
 COPY registry.redhat.io/ubi8/remediate_cis_rhel8.sh /opt/benchmark/remediate_cis_rhel8.sh
+
+RUN chmod -R 755 /opt/benchmark/scripts
 
 # 1.8.1.1, 1.8.1.2, 1.8.1.3
 # Fix warning banners
