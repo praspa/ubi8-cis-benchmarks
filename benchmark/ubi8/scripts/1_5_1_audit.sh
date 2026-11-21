@@ -45,3 +45,5 @@ else
  [ -n "$output3" ] && echo "$output3"
  [ -n "$output4" ] && echo "$output4"
 fi
+[ "$passing" = true ] && exit 0
+exit 1

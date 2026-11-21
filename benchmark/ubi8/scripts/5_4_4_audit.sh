@@ -1,28 +1,22 @@
 #!/bin/bash
+# CIS 5.4.4 Ensure password hashing algorithm is SHA-512.
 
 FILE="$1"
 
 RC=0
 
-test_lines=$(grep -E '^\s*password\s+sufficient\s+pam_unix.so' "${FILE}")
+test_lines=$(grep -E '^\s*password\s+sufficient\s+pam_unix\.so' "${FILE}")
 
-if [ $? -ne 0 ]; then
+if [ -z "${test_lines}" ]; then
     echo "No password hashing algorithm configuration found in ${FILE}"
-    RC=1
-else
-
-    for line in "${test_lines}"; do
-
-        echo "${line}" | grep 'sha512'
-
-        if [ $? -ne 0 ]; then
-            echo "Password Hashing algoritm in ${FILE} does not equal sha512"
-            RC=1
-        fi
-
-    done
-
+    exit 1
 fi
 
+while read -r line; do
+    if ! echo "${line}" | grep -qw 'sha512'; then
+        echo "Password hashing algorithm is not sha512 in ${FILE}: <${line}>"
+        RC=1
+    fi
+done <<< "${test_lines}"
 
 exit $RC

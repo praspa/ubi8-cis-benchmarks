@@ -1,26 +1,5 @@
 #!/bin/bash
+# Check INACTIVE (field 7 of /etc/shadow) for every user that has a password set.
+# An empty field means the value is not set, which also fails.
 
-RC=0
-
-test_lines=$(grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d: -f1,7)
-
-if [ $? -ne 0 ]; then
-    echo "No INACTIVE days found assoicated with each user in /etc/shadow."
-    RC=1
-else
-
-    for line in "${test_lines}"; do
-
-        inactive_days=$(echo "${line}" | grep -oE '[0-9]+')
-
-        if [ ${inactive_days} -gt 30 ]; then
-            echo "Entry:<${line}>"
-            echo "INACTIVE days > 30 for User in /etc/shadow"
-            RC=1
-        fi
-    done
-
-fi
-
-
-exit $RC
+awk -F: '($2 !~ /^[!*]/ && $2 != "") { if ($7 == "" || $7 > 30 || $7 < 0) { print "User: " $1 " has INACTIVE: <" $7 ">; required: 30 or less."; bad=1 } } END { exit bad }' /etc/shadow

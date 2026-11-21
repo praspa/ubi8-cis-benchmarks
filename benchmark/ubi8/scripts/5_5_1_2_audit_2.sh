@@ -1,26 +1,5 @@
 #!/bin/bash
+# Check PASS_MIN_DAYS (field 4 of /etc/shadow) for every user that has a password set.
+# An empty field means the value is not set, which also fails.
 
-RC=0
-
-test_lines=$(grep -E '^[^:]+:[^!*]' /etc/shadow | cut -d: -f1,4)
-
-if [ $? -ne 0 ]; then
-    echo "No PASS_MIN_DAYS found assoicated with each user in /etc/shadow."
-    RC=1
-else
-
-    for line in "${test_lines}"; do
-
-        pass_min_days=$(echo "${line}" | grep -oE '[0-9]+')
-
-        if [ ${pass_min_days} -lt 7 ]; then
-            echo "Entry:<${line}>"
-            echo "PASS_MIN_DAYS < 7 for User in /etc/shadow"
-            RC=1
-        fi
-    done
-
-fi
-
-
-exit $RC
+awk -F: '($2 !~ /^[!*]/ && $2 != "") { if ($4 == "" || $4 < 7) { print "User: " $1 " has PASS_MIN_DAYS: <" $4 ">; required: 7 or more."; bad=1 } } END { exit bad }' /etc/shadow
