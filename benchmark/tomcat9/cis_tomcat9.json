@@ -1707,9 +1707,7 @@
             "result_type": "rc"
           }
         ],
-        "remediations": [
-
-        ]
+        "remediations": []
       },
       {
         "id": "10.9",
