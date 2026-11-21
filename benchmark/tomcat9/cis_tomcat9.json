@@ -133,21 +133,19 @@
                 "cmd": "ls -l $JWS_HOME/lib/catalina.jar",
                 "result": "0",
                 "result_type": "rc"
+              },
+              {
+                "cmd": "which jar",
+                "result_type": "rc",
+                "result": "0"
               }
             ],
-            "cmd": "cd /tmp && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i tomcat org/apache/catalina/util/ServerInfo.properties",
+            "cmd": "cd \"$(mktemp -d)\" && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i tomcat org/apache/catalina/util/ServerInfo.properties",
             "result": "!0",
             "result_type": "rc"
           }
         ],
-        "remediations": [
-          {
-            "applicable_checks": [],
-            "cmd": "echo 'Fixed in Dockerfile build'",
-            "result": "0",
-            "result_type": "rc"
-          }
-        ]
+        "remediations": []
       },
       {
         "id": "2.2",
@@ -160,21 +158,19 @@
                 "cmd": "ls -l $JWS_HOME/lib/catalina.jar",
                 "result": "0",
                 "result_type": "rc"
+              },
+              {
+                "cmd": "which jar",
+                "result_type": "rc",
+                "result": "0"
               }
             ],
-            "cmd": "cd /tmp && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i server.number org/apache/catalina/util/ServerInfo.properties | grep redhat",
+            "cmd": "cd \"$(mktemp -d)\" && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i server.number org/apache/catalina/util/ServerInfo.properties | grep redhat",
             "result": "!0",
             "result_type": "rc"
           }
         ],
-        "remediations": [
-          {
-            "applicable_checks": [],
-            "cmd": "echo 'Fixed in Dockerfile build'",
-            "result": "0",
-            "result_type": "rc"
-          }
-        ]
+        "remediations": []
       },
       {
         "id": "2.3",
@@ -187,21 +183,19 @@
                 "cmd": "ls -l $JWS_HOME/lib/catalina.jar",
                 "result": "0",
                 "result_type": "rc"
+              },
+              {
+                "cmd": "which jar",
+                "result_type": "rc",
+                "result": "0"
               }
             ],
-            "cmd": "cd /tmp && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i server.built org/apache/catalina/util/ServerInfo.properties | grep UTC",
+            "cmd": "cd \"$(mktemp -d)\" && jar xf $JWS_HOME/lib/catalina.jar org/apache/catalina/util/ServerInfo.properties && grep -i server.built org/apache/catalina/util/ServerInfo.properties | grep UTC",
             "result": "!0",
             "result_type": "rc"
           }
         ],
-        "remediations": [
-          {
-            "applicable_checks": [],
-            "cmd": "echo 'Fixed in Dockerfile build'",
-            "result": "0",
-            "result_type": "rc"
-          }
-        ]
+        "remediations": []
       },
       {
         "id": "2.4",
@@ -216,7 +210,7 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "grep xpoweredBy=\"true\" $JWS_HOME/conf/server.xml",
+            "cmd": "grep 'xpoweredBy=\"true\"' $JWS_HOME/conf/server.xml",
             "result": "!0",
             "result_type": "rc"
           }
@@ -263,7 +257,7 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "grep allowTrace=\"true\" $JWS_HOME/conf/server.xml",
+            "cmd": "grep 'allowTrace=\"true\"' $JWS_HOME/conf/server.xml",
             "result": "!0",
             "result_type": "rc"
           },
@@ -337,7 +331,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "sed -i 's/ shutdown=\"SHUTDOWN\"/ shutdown=\"ShutItDown\"/g' $JWS_HOME/conf/server.xml",
+            "cmd": "SHUTDOWN_CMD=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32) && sed -i \"s/ shutdown=\\\"SHUTDOWN\\\"/ shutdown=\\\"${SHUTDOWN_CMD}\\\"/g\" $JWS_HOME/conf/server.xml",
             "result": "0",
             "result_type": "rc"
           }
@@ -405,7 +399,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME",
+            "cmd": "chmod 770 $JWS_HOME",
             "result": "0",
             "result_type": "rc"
           },
@@ -453,7 +447,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 \"$CATALINA_BASE\"",
+            "cmd": "chmod 770 \"$CATALINA_BASE\"",
             "result": "0",
             "result_type": "rc"
           },
@@ -500,7 +494,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME/conf",
+            "cmd": "chmod 770 $JWS_HOME/conf",
             "result": "0",
             "result_type": "rc"
           },
@@ -547,7 +541,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME/logs",
+            "cmd": "chmod 770 $JWS_HOME/logs",
             "result": "0",
             "result_type": "rc"
           },
@@ -594,7 +588,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME/temp",
+            "cmd": "chmod 770 $JWS_HOME/temp",
             "result": "0",
             "result_type": "rc"
           },
@@ -641,7 +635,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME/bin",
+            "cmd": "chmod 770 $JWS_HOME/bin",
             "result": "0",
             "result_type": "rc"
           },
@@ -679,7 +673,7 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "stat -c \"%a\" /deployments",
+            "cmd": "stat -c \"%a\" $JWS_HOME/webapps",
             "result": "770",
             "comment": "The webapps is a symlink to /deployments. Also, Check wants 750 on JWS_HOME/webapps, but group needs write on sub directories.",
             "result_type": "stdout"
@@ -688,7 +682,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "chmod 750 $JWS_HOME/webapps",
+            "cmd": "chmod 770 $JWS_HOME/webapps",
             "result": "0",
             "result_type": "rc"
           },
@@ -807,8 +801,8 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "stat -c \"%U:%G\" $JWS_HOME/conf/context.xml",
-            "result": "jboss:root",
+            "cmd": "stat -c \"%u:%G\" $JWS_HOME/conf/context.xml",
+            "result": "185:root",
             "comment": "Check wants tomcat admin as owner, container performs dynamic uid user chown on file. Check calls for tomcat_admin:tomcat. Container image is designed for 185:root.",
             "result_type": "stdout"
           },
@@ -901,8 +895,8 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "stat -c \"%U:%G\" $JWS_HOME/conf/server.xml",
-            "result": "jboss:root",
+            "cmd": "stat -c \"%u:%G\" $JWS_HOME/conf/server.xml",
+            "result": "185:root",
             "comment": "S2i scripts sets the ownership to dyanmic uid. Check calls for tomcat_admin:tomcat. Container image is designed for 185:root.",
             "result_type": "stdout"
           },
@@ -929,7 +923,7 @@
           },
           {
             "applicable_checks": [],
-            "cmd": "chown jboss:root $JWS_HOME/conf/server.xml",
+            "cmd": "chown 185:root $JWS_HOME/conf/server.xml",
             "result": "0",
             "result_type": "rc"
           }
@@ -1271,7 +1265,7 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "grep -A4 'port=\"8443\"' $JWS_HOME/conf/server.xml | grep 'sslProtocol=\"TLSv1.3+TLSv1.2\"\\|SSLProtocol=\"TLSv1.3+TLSv1.2\"'",
+            "cmd": "grep -A4 'port=\"8443\"' $JWS_HOME/conf/server.xml | grep -Ei 'sslProtocol=\"(TLSv1\\.2\\+TLSv1\\.3|TLSv1\\.3\\+TLSv1\\.2)\"'",
             "comment": "sslProtocl for Nio and SSLProtocol for APR provider.",
             "result": "0",
             "result_type": "rc"
@@ -1280,7 +1274,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "sed -i 's/sslProtocol=\".*\"/sslProtocol=\"TLSv1.2+TLSv1.3\"/g' $JWS_HOME/conf/server.xml",
+            "cmd": "sed -i 's/sslProtocol=\"[^\"]*\"/sslProtocol=\"TLSv1.2+TLSv1.3\"/g' $JWS_HOME/conf/server.xml",
             "result": "0",
             "result_type": "rc"
           }
@@ -1440,7 +1434,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "sed -i 's/package.access=.*/package.access=sun.,org.apache.catalina.,org.apache.coyote.,org.apache.jasper.,org.apache.tomcat./g $JWS_HOME/conf/catalina.properties",
+            "cmd": "sed -i 's/package.access=.*/package.access=sun.,org.apache.catalina.,org.apache.coyote.,org.apache.jasper.,org.apache.tomcat./g' $JWS_HOME/conf/catalina.properties",
             "result": "0",
             "result_type": "rc"
           }
@@ -1459,20 +1453,13 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "grep '-security' $JWS_HOME/bin/launch.sh",
+            "cmd": "grep -- '-security' $JWS_HOME/bin/launch.sh",
             "result": "0",
             "result_type": "rc"
           }
         ],
-        "remediations": [
-          {
-            "applicable_checks": [],
-            "cmd": "echo todo",
-            "comment": "sed over launch.sh to add -security. But then developers need to define a catalina.policy.",
-            "result": "0",
-            "result_type": "rc"
-          }
-        ]
+        "remediations": [],
+        "comment": "No automated remediation: adding -security to launch.sh requires developers to define a catalina.policy."
       },
       {
         "id": "9.2",
@@ -1495,7 +1482,7 @@
         "remediations": [
           {
             "applicable_checks": [],
-            "cmd": "sed -i 's/autoDeploy=\"true\"/autoDeploy=\"false\"' $JWS_HOME/conf/server.xml",
+            "cmd": "sed -i 's/autoDeploy=\"true\"/autoDeploy=\"false\"/' $JWS_HOME/conf/server.xml",
             "result": "0",
             "result_type": "rc"
           }
@@ -1519,16 +1506,8 @@
             "result_type": "rc"
           }
         ],
-        "remediations": [
-          {
-            "applicable_checks": [],
-            "cmd": "echo todo",
-            "todo-cmd": "sed -i 's/deployOnStartup=\"true\"/DeployOnStartup=\"false\"' $JWS_HOME/conf/server.xml",
-            "comment": "s2i tomcat designed to put war archive in webapps directory",
-            "result": "0",
-            "result_type": "rc"
-          }
-        ]
+        "remediations": [],
+        "comment": "No automated remediation: s2i tomcat is designed to put war archives in webapps and deploy them on startup."
       },
       {
         "id": "10.1",
@@ -1538,7 +1517,7 @@
           {
             "applicable_checks": [
               {
-                "cmd": "echo 'not applicable containerized environment.",
+                "cmd": "echo 'not applicable: containerized environment.'",
                 "result": "!0",
                 "result_type": "rc"
               }
@@ -1972,7 +1951,7 @@
                 "result_type": "rc"
               }
             ],
-            "cmd": "grep -i '<login-config>[.\n]*<auth-method>DIGEST</auth-method>[.\n]*<realm-name>UserDatabase</realm-name>[.\n]*</login-config>' $JWS_HOME/webapps/manager/WEB-INF/web.xml",
+            "cmd": "grep -Pizq '(?s)<login-config>\\s*<auth-method>DIGEST</auth-method>' $JWS_HOME/webapps/manager/WEB-INF/web.xml",
             "result": "0",
             "result_type": "rc"
           }
