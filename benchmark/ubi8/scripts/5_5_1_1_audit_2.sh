@@ -1,27 +1,5 @@
 #!/bin/bash
+# Check PASS_MAX_DAYS (field 5 of /etc/shadow) for every user that has a password set.
+# An empty field means the value is not set, which also fails.
 
-RC=0
-
-test_lines=$(grep -E '^[^:]+:[^!*]' /etc/shadow | cut -d: -f1,5)
-
-if [ $? -ne 0 ]; then
-    echo "No PASS_MAX_DAYS found assoicated with each user in /etc/shadow."
-    RC=1
-else
-
-    for line in "${test_lines}"; do
-
-        pass_max_days=$(echo "${line}" | grep -oE '[0-9]+')
-
-        if [ ${pass_max_days} -gt 365 ]; then
-            echo "Entry:<${line}>"
-            echo "PASS_MAX_DAYS > 365 for User in /etc/shadow"
-            RC=1
-        fi
-
-    done
-
-fi
-
-
-exit $RC
+awk -F: '($2 !~ /^[!*]/ && $2 != "") { if ($5 == "" || $5 > 365 || $5 < 0) { print "User: " $1 " has PASS_MAX_DAYS: <" $5 ">; required: 365 or less."; bad=1 } } END { exit bad }' /etc/shadow

@@ -1,19 +1,17 @@
 #!/bin/bash
+# Check PASS_MIN_DAYS in /etc/login.defs (ignores comments).
 
-RC=0
+value=$(awk '/^[[:space:]]*PASS_MIN_DAYS[[:space:]]+[0-9]+/ {v=$2} END {print v}' /etc/login.defs)
 
-pass_max_days=$(grep PASS_MIN_DAYS /etc/login.defs | grep -oE '[0-9]+')
-
-if [ $? -ne 0 ]; then
+if [ -z "${value}" ]; then
     echo "No PASS_MIN_DAYS found in /etc/login.defs"
-    RC=1
-    exit $RC
+    exit 1
 fi
 
-if [ ${pass_max_days} -lt 7 ]; then
-    echo "PASS_MIN_DAYS configuration in /etc/login.defs is less than 7."
-    RC=1
+if [ "${value}" -lt 7 ]; then
+    echo "PASS_MIN_DAYS in /etc/login.defs is ${value}; required: 7 or more."
+    exit 1
 fi
 
-
-exit $RC
+echo "PASS_MIN_DAYS in /etc/login.defs is ${value}."
+exit 0

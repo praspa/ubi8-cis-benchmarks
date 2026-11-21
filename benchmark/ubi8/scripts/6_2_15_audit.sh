@@ -2,7 +2,7 @@
 
 RC=0
 
-cut -f3 -d":" /etc/passwd | sort -n | uniq -c | while read x ; do
+while read x ; do
     [ -z "$x" ] && break
  
     set - $x
@@ -13,6 +13,6 @@ cut -f3 -d":" /etc/passwd | sort -n | uniq -c | while read x ; do
         RC=1
     fi
 
-done
+done < <(cut -f3 -d":" /etc/passwd | sort -n | uniq -c)
 
 exit $RC

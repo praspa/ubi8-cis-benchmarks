@@ -49,12 +49,12 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "which rmod",
-								"result": "0",
-								"result_type": "rc"
+								"cmd": "which rmmod",
+								"result_type": "rc",
+								"result": "0"
 							}
 						],
-						"cmd": "rmod cramfs",
+						"cmd": "if lsmod | grep -q '^cramfs\\b'; then rmmod cramfs; fi",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -119,12 +119,12 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "which rmod",
-								"result": "0",
-								"result_type": "rc"
+								"cmd": "which rmmod",
+								"result_type": "rc",
+								"result": "0"
 							}
 						],
-						"cmd": "rmod vfat",
+						"cmd": "if lsmod | grep -q '^vfat\\b'; then rmmod vfat; fi",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -176,12 +176,12 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "which rmod",
-								"result": "0",
-								"result_type": "rc"
+								"cmd": "which rmmod",
+								"result_type": "rc",
+								"result": "0"
 							}
 						],
-						"cmd": "rmod squashfs",
+						"cmd": "if lsmod | grep -q '^squashfs\\b'; then rmmod squashfs; fi",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -233,12 +233,12 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "which rmod",
-								"result": "0",
-								"result_type": "rc"
+								"cmd": "which rmmod",
+								"result_type": "rc",
+								"result": "0"
 							}
 						],
-						"cmd": "rmod udf",
+						"cmd": "if lsmod | grep -q '^udf\\b'; then rmmod udf; fi",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -284,8 +284,8 @@
 							}
 						],
 						"cmd": "systemctl is-enabled tmp.mount",
-						"result": "stdout",
-						"result_type": "enabled"
+						"result": "enabled",
+						"result_type": "stdout"
 					}
 				],
 				"remediations": []
@@ -608,7 +608,8 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": []
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "1.1.19",
@@ -628,7 +629,8 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": []
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "1.1.20",
@@ -648,7 +650,8 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": []
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "1.1.21",
@@ -730,7 +733,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "lsmod | grep usb-storage",
+						"cmd": "lsmod | grep usb_storage",
 						"result": "",
 						"result_type": "stdout"
 					}
@@ -751,12 +754,12 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "which rmod",
+								"cmd": "which rmmod",
 								"result_type": "rc",
 								"result": "0"
 							}
 						],
-						"cmd": "rmod usb-storage",
+						"cmd": "if lsmod | grep -q '^usb_storage\\b'; then rmmod usb_storage; fi",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -964,29 +967,10 @@
 								"comment": "Check if we are in a container."
 							}
 						],
-						"cmd": "grep -Ei '^\\s*Defaults\\s+(\\[^#]+,\\s*)?use_pty' /etc/sudoers",
+						"cmd": "cat /etc/sudoers /etc/sudoers.d/* 2>/dev/null | grep -Eqi '^\\s*Defaults\\s+([^#]+,\\s*)?use_pty'",
 						"result": "0",
-						"result_type": "rc"
-					},
-					{
-						"applicable_checks": [
-							{
-								"cmd": "ls -al /proc/1/exe | grep systemd",
-								"result_type": "rc",
-								"result": "0",
-								"comment": "Check if we are in a container."
-							},
-							{
-								"cmd": "ls -1q /etc/sudoers.d/ 2>/dev/null | wc -l",
-								"result_type": "stdout",
-								"result": "!0",
-								"comment": "nonzero files in directory."
-							}
-						],
-						"cmd": "grep -Eiv '^\\s*Defaults\\s+(\\[^#]+,\\s*)?use_pty' /etc/sudoers.d/*",
-						"result": "!0",
 						"result_type": "rc",
-						"comment": "Inverted grep. A file in /etc/sudoers.d/ does not contain the logfile definition."
+						"comment": "Setting may live in /etc/sudoers or any file in /etc/sudoers.d/."
 					}
 				],
 				"remediations": [
@@ -1000,25 +984,6 @@
 							}
 						],
 						"cmd": "echo 'Defaults use_pty' >> /etc/sudoers",
-						"result": "0",
-						"result_type": "rc"
-					},
-					{
-						"applicable_checks": [
-							{
-								"cmd": "ls -1q /etc/sudoers.d/ 2>/dev/null | wc -l",
-								"result_type": "stdout",
-								"result": "!0",
-								"comment": "nonzero files in directory."
-							},
-							{
-								"cmd": "ls -al /proc/1/exe | grep systemd",
-								"result_type": "rc",
-								"result": "0",
-								"comment": "Check if we are in a container."
-							}
-						],
-						"cmd": "echo 'Defaults use_pty' | tee /etc/sudoers/*.conf",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -1038,29 +1003,10 @@
 								"comment": "Check if we are in a container."
 							}
 						],
-						"cmd": "grep -Esi '^\\s*Defaults\\s+([^#]+,\\s*)?logfile=' /etc/sudoers",
+						"cmd": "cat /etc/sudoers /etc/sudoers.d/* 2>/dev/null | grep -Eqi '^\\s*Defaults\\s+([^#]+,\\s*)?logfile='",
 						"result": "0",
-						"result_type": "rc"
-					},
-					{
-						"applicable_checks": [
-							{
-								"cmd": "ls -al /proc/1/exe | grep systemd",
-								"result_type": "rc",
-								"result": "0",
-								"comment": "Check if we are in a container."
-							},
-							{
-								"cmd": "ls -1q /etc/sudoers.d/ 2>/dev/null | wc -l",
-								"result_type": "stdout",
-								"result": "!0",
-								"comment": "nonzero files in directory."
-							}
-						],
-						"cmd": "grep -Esiv '^\\s*Defaults\\s+([^#]+,\\s*)?logfile=' /etc/sudoers /etc/sudoers.d/*",
-						"result": "!0",
 						"result_type": "rc",
-						"comment": "Inverted grep. A file in /etc/sudoers.d/ does not contain the logfile definition."
+						"comment": "Setting may live in /etc/sudoers or any file in /etc/sudoers.d/."
 					}
 				],
 				"remediations": [
@@ -1073,29 +1019,9 @@
 								"comment": "Check if we are in a container."
 							}
 						],
-						"cmd": "echo 'Defaults use_pty' >> /etc/sudoers",
+						"cmd": "echo 'Defaults logfile=\"/var/log/sudo.log\"' >> /etc/sudoers",
 						"result": "0",
 						"result_type": "rc"
-					},
-					{
-						"applicable_checks": [
-							{
-								"cmd": "ls -1q /etc/sudoers.d/ 2>/dev/null | wc -l",
-								"result_type": "stdout",
-								"result": "!0",
-								"comment": "nonzero files in directory."
-							},
-							{
-								"cmd": "ls -al /proc/1/exe | grep systemd",
-								"result_type": "rc",
-								"result": "0",
-								"comment": "Check if we are in a container."
-							}
-						],
-						"cmd": "echo 'Defaults logfile=\"/var/log/sudo.log\"' | tee /etc/sudoers/*.conf",
-						"result": "0",
-						"result_type": "rc",
-						"comment": "Update log file path based on site requirements and procedures."
 					}
 				]
 			},
@@ -1128,7 +1054,7 @@
 								"comment": "Check if we are in a container."
 							}
 						],
-						"cmd": "dnf -y install sudo",
+						"cmd": "dnf -y install aide",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -1174,7 +1100,7 @@
 								"comment": "Check if we are in a container."
 							}
 						],
-						"cmd": "grep -Ers '^([^#]+\\s+)?(\/usr\/s?bin\/|^\\s*)aide(\\.wrapper)?\\s(--?\\S+\\s)*(--(check|update)|\\$AIDEARGS)\b' /etc/cron.* /etc/crontab /var/spool/cron/",
+						"cmd": "grep -Ers '^([^#]+\\s+)?(/usr/s?bin/|^\\s*)aide(\\.wrapper)?\\s(--?\\S+\\s)*(--(check|update)|\\$AIDEARGS)\\b' /etc/cron.* /etc/crontab /var/spool/cron/",
 						"result": "0",
 						"result_type": "rc",
 						"comment": "Ensure that a job exists somewhere."
@@ -1325,7 +1251,7 @@
 								"comment": "Check current setting"
 							}
 						],
-						"cmd": "sed -i \"s/ExecStart=.*/ExecStart=-/usr/lib/systemd/systemd-sulogin-shell rescue/\" /usr/lib/systemd/system/rescue.service",
+						"cmd": "sed -i \"s|ExecStart=.*|ExecStart=-/usr/lib/systemd/systemd-sulogin-shell rescue|\" /usr/lib/systemd/system/rescue.service",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -1344,7 +1270,7 @@
 								"comment": "Check current setting"
 							}
 						],
-						"cmd": "sed -i \"s/ExecStart=.*/ExecStart=-/usr/lib/systemd/systemd-sulogin-shell emergency/\" /usr/lib/systemd/system/emergency.service",
+						"cmd": "sed -i \"s|ExecStart=.*|ExecStart=-/usr/lib/systemd/systemd-sulogin-shell emergency|\" /usr/lib/systemd/system/emergency.service",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -1527,7 +1453,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep -E 'kernelopts=(\\S+\\s+)*(selinux=0|enforcing=0)+\b'",
+						"cmd": "grep -E 'kernelopts=(\\S+\\s+)*(selinux=0|enforcing=0)+\\b' /boot/grub2/grubenv",
 						"result": "!0",
 						"result_type": "rc",
 						"comment": "Nothing should be returned."
@@ -1882,7 +1808,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/motd | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/motd 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -1894,7 +1820,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/motd | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/motd | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -1927,7 +1853,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/issue | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/issue 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -1939,7 +1865,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/issue | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/issue | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -1972,7 +1898,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/issue.net | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/issue.net 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -1984,7 +1910,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/issue.net | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/issue.net | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -2046,7 +1972,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "cat ./conf/greeter.dconf-defautls > /etc/gdm/greeter.dconf-defaults",
+						"cmd": "cat ./conf/greeter.dconf-defaults > /etc/gdm/greeter.dconf-defaults",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -2085,7 +2011,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "cat /bin/true",
+						"cmd": "dnf -y update --security",
 						"comment": "TODO: update cmd to 'dnf update', too cowardly to do it now else might accidentally perform this on a host.",
 						"result": "0",
 						"result_type": "rc"
@@ -2228,7 +2154,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "dnf install chrony",
+						"cmd": "dnf -y install chrony",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -2264,8 +2190,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "2.2.2",
@@ -2893,8 +2818,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "2.3.1",
@@ -3384,7 +3308,7 @@
 						"cmd": "grep  \"net\\.ipv4\\.conf\\.default\\.accept_redirects\" /run/sysctl.d/*.conf | grep 'net.ipv4.conf.default.accept_redirects = 0'",
 						"result": "0",
 						"result_type": "rc"
-					},					
+					},
 					{
 						"applicable_checks": [
 							{
@@ -4082,8 +4006,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.3.2",
@@ -4115,8 +4038,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.3.3",
@@ -4148,8 +4070,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.3.4",
@@ -4181,8 +4102,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.1.1",
@@ -4202,8 +4122,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.2.1",
@@ -4240,8 +4159,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.2.2",
@@ -4283,8 +4201,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.2.3",
@@ -4326,8 +4243,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.2.4",
@@ -4336,15 +4252,14 @@
 				"comment": "Set default zone to company policy. # firewall-cmd --get-default-zone",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.2.5",
@@ -4353,15 +4268,14 @@
 				"comment": "nmcli -t connection show | awk -F: '{if($4){print $4}}' | while read INT; do firewall-cmd --get-active-zones | grep -B1 $INT; done",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.2.6",
@@ -4370,15 +4284,14 @@
 				"comment": "firewall-cmd --get-active-zones | awk '!/:/ {print $1}' | while read ZN; do firewall-cmd --list-all --zone=$ZN; done",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.3.1",
@@ -4425,8 +4338,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.3.2",
@@ -4446,8 +4358,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.3.3",
@@ -4491,8 +4402,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.3.4",
@@ -4541,8 +4451,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.3.5",
@@ -4551,15 +4460,14 @@
 				"comment": "TODO",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.3.6",
@@ -4603,8 +4511,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.3.7",
@@ -4651,15 +4558,14 @@
 				"comment": "TODO",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.4.1.1",
@@ -4703,8 +4609,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.4.1.2",
@@ -4717,7 +4622,7 @@
 								"cmd": "which iptables",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "iptables -L INPUT -v -n | grep 'ACCEPT     all  --  lo     \\*       0.0.0.0/0            0.0.0.0/0'",
 						"result": "0",
@@ -4729,7 +4634,7 @@
 								"cmd": "which iptables",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "iptables -L INPUT -v -n | grep 'DROP       all  --  \\*      \\*       127.0.0.0/8          0.0.0.0/0'",
 						"result": "0",
@@ -4741,15 +4646,14 @@
 								"cmd": "which iptables",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "iptables -L OUTPUT -v -n | grep 'ACCEPT     all  --  \\*      lo      0.0.0.0/0            0.0.0.0/0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.4.1.3",
@@ -4758,15 +4662,14 @@
 				"comment": "TODO",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.4.1.4",
@@ -4775,15 +4678,14 @@
 				"comment": "TODO, compare listeners against accept rules",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.4.1.5",
@@ -4880,8 +4782,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.4.2.2",
@@ -4900,7 +4801,7 @@
 								"cmd": "cat /sys/module/ipv6/parameters/disable | grep 0",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "ip6tables -L INPUT -v -n | grep 'ACCEPT     all    lo     \\*       ::0/0                ::/0'",
 						"result": "0",
@@ -4917,7 +4818,7 @@
 								"cmd": "cat /sys/module/ipv6/parameters/disable | grep 0",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "ip6tables -L INPUT -v -n | grep 'DROP       all    \\*      \\*      ::1          ::/0'",
 						"result": "0",
@@ -4934,15 +4835,14 @@
 								"cmd": "cat /sys/module/ipv6/parameters/disable | grep 0",
 								"result_type": "rc",
 								"result": "0"
-							}			
+							}
 						],
 						"cmd": "ip6tables -L OUTPUT -v -n | grep 'ACCEPT     all    \\*      lo      ::/0            ::/0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "3.4.4.2.3",
@@ -4958,13 +4858,13 @@
 								"result": "0"
 							}
 						],
-						"cmd": "cat /bin/true",
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.4.2.4",
@@ -4980,13 +4880,13 @@
 								"result": "0"
 							}
 						],
-						"cmd": "cat /bin/true",
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.4.4.2.5",
@@ -5043,15 +4943,14 @@
 				"comment": "TODO",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
-						"cmd": "cat /bin/true",
+						"applicable_checks": [],
+						"cmd": "/bin/true",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": [],
+				"manual": true
 			},
 			{
 				"id": "3.6",
@@ -5071,8 +4970,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.1.1",
@@ -5173,8 +5071,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.1.4",
@@ -5194,8 +5091,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.2.1",
@@ -5216,8 +5112,7 @@
 						"comment": "Update size in MB for site policy."
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.2.2",
@@ -5237,8 +5132,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.2.3",
@@ -5282,8 +5176,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.3",
@@ -5298,7 +5191,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/sudoers -p wa -k scope' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/sudoers -p wa -k scope' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5310,13 +5203,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/sudoers.d/ -p wa -k scope' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/sudoers.d/ -p wa -k scope' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.4",
@@ -5331,7 +5223,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /var/log/lastlog -p wa -k logins' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /var/log/lastlog -p wa -k logins' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5343,13 +5235,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /var/run/faillock/ -p wa -k logins' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /var/run/faillock/ -p wa -k logins' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.5",
@@ -5364,7 +5255,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /var/run/utmp -p wa -k session' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /var/run/utmp -p wa -k session' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5376,7 +5267,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /var/log/wtmp -p wa -k logins' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /var/log/wtmp -p wa -k logins' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5388,7 +5279,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /var/log/btmp -p wa -k logins' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /var/log/btmp -p wa -k logins' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5400,7 +5291,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /var/run/utmp -p wa -k session'",
+						"cmd": "auditctl -l | grep -- '-w /var/run/utmp -p wa -k session'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5412,7 +5303,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /var/log/wtmp -p wa -k logins'",
+						"cmd": "auditctl -l | grep -- '-w /var/log/wtmp -p wa -k logins'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5424,13 +5315,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /var/log/btmp -p wa -k logins'",
+						"cmd": "auditctl -l | grep -- '-w /var/log/btmp -p wa -k logins'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.6",
@@ -5450,7 +5340,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5467,7 +5357,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5484,7 +5374,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S clock_settime -k time-change'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S clock_settime -k time-change'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5501,7 +5391,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S clock_settime -k time-change'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S clock_settime -k time-change'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5518,13 +5408,12 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/localtime -p wa -k time-change'",
+						"cmd": "auditctl -l | grep -- '-w /etc/localtime -p wa -k time-change'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.7",
@@ -5539,7 +5428,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/selinux/ -p wa -k MAC-policy' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/selinux/ -p wa -k MAC-policy' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5551,7 +5440,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /usr/share/selinux/ -p wa -k MAC-policy' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /usr/share/selinux/ -p wa -k MAC-policy' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5563,7 +5452,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/selinux/ -p wa -k MAC-policy'",
+						"cmd": "auditctl -l | grep -- '-w /etc/selinux/ -p wa -k MAC-policy'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5575,13 +5464,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /usr/share/selinux/ -p wa -k MAC-policy'",
+						"cmd": "auditctl -l | grep -- '-w /usr/share/selinux/ -p wa -k MAC-policy'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.8",
@@ -5601,7 +5489,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5618,7 +5506,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5635,7 +5523,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/issue -p wa -k system-locale",
+						"cmd": "auditctl -l | grep -- '-w /etc/issue -p wa -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5652,7 +5540,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/issue.net -p wa -k system-locale'",
+						"cmd": "auditctl -l | grep -- '-w /etc/issue.net -p wa -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5669,7 +5557,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/hosts -p wa -k system-locale'",
+						"cmd": "auditctl -l | grep -- '-w /etc/hosts -p wa -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5686,7 +5574,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/sysconfig/network -p wa -k system-locale'",
+						"cmd": "auditctl -l | grep -- '-w /etc/sysconfig/network -p wa -k system-locale'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5698,7 +5586,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5710,7 +5598,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5722,7 +5610,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/issue -p wa -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/issue -p wa -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5734,7 +5622,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/issue.net -p wa -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/issue.net -p wa -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5746,7 +5634,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/hosts -p wa -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/hosts -p wa -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5758,13 +5646,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/sysconfig/network -p wa -k system-locale' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/sysconfig/network -p wa -k system-locale' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.9",
@@ -5784,7 +5671,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5801,7 +5688,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5818,7 +5705,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S chown,fchown,lchown,fchownat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S chown,fchown,lchown,fchownat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5835,7 +5722,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S lchown,fchown,chown,fchownat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S lchown,fchown,chown,fchownat -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5852,7 +5739,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S setxattr,lsetxattr,fsetxattr,removexattr,lremovexattr,fremovexattr -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S setxattr,lsetxattr,fsetxattr,removexattr,lremovexattr,fremovexattr -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5869,7 +5756,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S setxattr,lsetxattr,fsetxattr,removexattr,lremovexattr,fremovexattr -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S setxattr,lsetxattr,fsetxattr,removexattr,lremovexattr,fremovexattr -F auid>=1000 -F auid!=-1 -F key=perm_mod'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5881,7 +5768,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5893,7 +5780,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5905,7 +5792,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5917,7 +5804,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5929,7 +5816,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5941,13 +5828,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.10",
@@ -5967,7 +5853,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k access'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k access'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -5984,7 +5870,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k access'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k access'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6001,7 +5887,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k access'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k access'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6018,7 +5904,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k access'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k access'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6030,7 +5916,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6042,7 +5928,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6054,7 +5940,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6066,13 +5952,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.11",
@@ -6092,7 +5977,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/group -p wa -k identity'",
+						"cmd": "auditctl -l | grep -- '-w /etc/group -p wa -k identity'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6109,7 +5994,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/passwd -p wa -k identity'",
+						"cmd": "auditctl -l | grep -- '-w /etc/passwd -p wa -k identity'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6126,7 +6011,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/gshadow -p wa -k identity'",
+						"cmd": "auditctl -l | grep -- '-w /etc/gshadow -p wa -k identity'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6143,7 +6028,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/shadow -p wa -k identity'",
+						"cmd": "auditctl -l | grep -- '-w /etc/shadow -p wa -k identity'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6160,7 +6045,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /etc/security/opasswd -p wa -k identity'",
+						"cmd": "auditctl -l | grep -- '-w /etc/security/opasswd -p wa -k identity'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6172,7 +6057,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/group -p wa -k identity' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/group -p wa -k identity' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6184,7 +6069,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/passwd -p wa -k identity' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/passwd -p wa -k identity' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6196,7 +6081,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/gshadow -p wa -k identity' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/gshadow -p wa -k identity' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6208,7 +6093,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/shadow -p wa -k identity' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/shadow -p wa -k identity' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6220,13 +6105,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /etc/security/opasswd -p wa -k identity' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /etc/security/opasswd -p wa -k identity' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.12",
@@ -6246,7 +6130,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=-1 -k mounts'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=-1 -k mounts'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6263,7 +6147,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=-1 -k mounts'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=-1 -k mounts'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6275,7 +6159,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6287,13 +6171,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.14",
@@ -6313,7 +6196,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=-1 -k delete'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=-1 -k delete'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6330,7 +6213,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=-1 -k delete'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=-1 -k delete'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6342,7 +6225,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6354,13 +6237,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.15",
@@ -6380,7 +6262,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /sbin/insmod -p x -k modules'",
+						"cmd": "auditctl -l | grep -- '-w /sbin/insmod -p x -k modules'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6397,7 +6279,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /sbin/rmmod -p x -k modules'",
+						"cmd": "auditctl -l | grep -- '-w /sbin/rmmod -p x -k modules'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6414,7 +6296,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-w /sbin/modprobe -p x -k modules'",
+						"cmd": "auditctl -l | grep -- '-w /sbin/modprobe -p x -k modules'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6431,7 +6313,7 @@
 								"result": "x86_64"
 							}
 						],
-						"cmd": "auditctl -l | grep '-a always,exit -F arch=b64 -S init_module,delete_module -F key=modules'",
+						"cmd": "auditctl -l | grep -- '-a always,exit -F arch=b64 -S init_module,delete_module -F key=modules'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6443,7 +6325,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /sbin/insmod -p x -k modules' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /sbin/insmod -p x -k modules' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6455,7 +6337,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /sbin/rmmod -p x -k modules' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /sbin/rmmod -p x -k modules' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6467,7 +6349,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-w /sbin/modprobe -p x -k modules' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-w /sbin/modprobe -p x -k modules' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6479,13 +6361,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules' /etc/audit/rules.d/*.rules",
+						"cmd": "grep -- '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules' /etc/audit/rules.d/*.rules",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.16",
@@ -6515,8 +6396,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.1.17",
@@ -6531,13 +6411,12 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "grep \"^\\s*[^#]\" /etc/audit/rules.d/*.rules | tail -1 | grep '-e 2'",
+						"cmd": "grep \"^\\s*[^#]\" /etc/audit/rules.d/*.rules | tail -1 | grep -- '-e 2'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.1.1",
@@ -6571,7 +6450,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "dnf install rsyslog",
+						"cmd": "dnf -y install rsyslog",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -6650,8 +6529,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.1.5",
@@ -6666,7 +6544,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep \"^*.*[^I][^I]*@\" /etc/rsyslog.conf'",
+						"cmd": "grep \"^*.*[^I][^I]*@\" /etc/rsyslog.conf",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6683,8 +6561,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.1.6",
@@ -6740,8 +6617,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.2.1",
@@ -6751,7 +6627,7 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "stat /etc/systemd/journal.conf",
+								"cmd": "stat /etc/systemd/journald.conf",
 								"result_type": "rc",
 								"result": "0"
 							}
@@ -6761,8 +6637,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.2.2",
@@ -6772,7 +6647,7 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "stat /etc/systemd/journal.conf",
+								"cmd": "stat /etc/systemd/journald.conf",
 								"result_type": "rc",
 								"result": "0"
 							}
@@ -6782,8 +6657,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.2.3",
@@ -6793,7 +6667,7 @@
 					{
 						"applicable_checks": [
 							{
-								"cmd": "stat /etc/systemd/journal.conf",
+								"cmd": "stat /etc/systemd/journald.conf",
 								"result_type": "rc",
 								"result": "0"
 							}
@@ -6803,8 +6677,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "4.2.3",
@@ -6825,8 +6698,7 @@
 						"comment": "Use grep . trick returns nonzero when no files found"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.1.1",
@@ -6879,7 +6751,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/crontab | grep 600",
+						"cmd": "bash ./scripts/check_mode.sh /etc/crontab 600",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6891,7 +6763,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/crontab | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/crontab | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -6924,7 +6796,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.hourly | grep 700",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.hourly 700",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6936,7 +6808,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.hourly | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.hourly | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -6969,7 +6841,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.daily | grep 700",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.daily 700",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -6981,7 +6853,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.daily | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.daily | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7014,7 +6886,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.weekly | grep 700",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.weekly 700",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7026,7 +6898,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.weekly | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.weekly | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7059,7 +6931,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.monthly | grep 700",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.monthly 700",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7071,7 +6943,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.monthly | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.monthly | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7104,7 +6976,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.d | grep 700",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.d 700",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7116,7 +6988,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.d | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.d | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7142,15 +7014,13 @@
 				"description": "Ensure at/cron is restricted to authorized users (Automated)",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
+						"applicable_checks": [],
 						"cmd": "stat /etc/cron.deny",
 						"result": "!0",
 						"result_type": "rc"
 					},
 					{
-						"applicable_checks": [
-						],
+						"applicable_checks": [],
 						"cmd": "stat /etc/at.deny",
 						"result": "!0",
 						"result_type": "rc"
@@ -7163,7 +7033,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/cron.allow | grep 600",
+						"cmd": "bash ./scripts/check_mode.sh /etc/cron.allow 600",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7175,7 +7045,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/cron.allow | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/cron.allow | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7187,7 +7057,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/at.allow | grep 600",
+						"cmd": "bash ./scripts/check_mode.sh /etc/at.allow 600",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7199,7 +7069,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/at.allow | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/at.allow | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7292,7 +7162,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/ssh/sshd_config | grep 600",
+						"cmd": "bash ./scripts/check_mode.sh /etc/ssh/sshd_config 600",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -7304,7 +7174,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/ssh/sshd_config | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/ssh/sshd_config | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7354,8 +7224,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.2.3",
@@ -7363,8 +7232,7 @@
 				"description": "Ensure permissions on SSH private host key files are configured (Automated)",
 				"audits": [
 					{
-						"applicable_checks": [
-						],
+						"applicable_checks": [],
 						"cmd": "bash ./scripts/5_2_3_audit.sh",
 						"result": "0",
 						"result_type": "rc"
@@ -7396,7 +7264,7 @@
 								"cmd": "test -r /etc/ssh",
 								"result_type": "rc",
 								"result": "0"
-							}		
+							}
 						],
 						"cmd": "bash ./scripts/5_2_4_audit.sh",
 						"result": "0",
@@ -7412,7 +7280,7 @@
 								"result": "!0"
 							}
 						],
-						"cmd": "find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chmod u-x,go-wx {} \\; find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chown root:root {} \\;",
+						"cmd": "find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chmod u-x,go-wx {} \\; && find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chown root:root {} \\;",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -7448,8 +7316,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.2.6",
@@ -7481,8 +7348,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.2.7",
@@ -7568,7 +7434,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep -Ei '^\\s*ignorerhosts\\s+no\b' /etc/ssh/sshd_config",
+						"cmd": "grep -Ei '^\\s*ignorerhosts\\s+no\\b' /etc/ssh/sshd_config",
 						"result": "!0",
 						"result_type": "rc"
 					}
@@ -7851,7 +7717,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep clientaliveinterval | grep -Ei 'ClientAliveInterval\\s+[1-9][0-9]{0,2}\\b",
+						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep clientaliveinterval | grep -Ei 'ClientAliveInterval\\s+[1-9][0-9]{0,2}\\b'",
 						"result": "0",
 						"result_type": "rc",
 						"comment": "Match 1-999"
@@ -7864,7 +7730,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep clientalivecountmax | grep -Ei 'ClientAliveCountMax\\s+0\\b",
+						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep clientalivecountmax | grep -Ei 'ClientAliveCountMax\\s+0\\b'",
 						"result": "0",
 						"result_type": "rc",
 						"comment": "Match 0"
@@ -7889,7 +7755,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep -Ei '^\\s*ClientAliveCountMax\\s+([1-9]|[1-9][0-9]+)\b' /etc/ssh/sshd_config",
+						"cmd": "grep -Ei '^\\s*ClientAliveCountMax\\s+([1-9]|[1-9][0-9]+)\\b' /etc/ssh/sshd_config",
 						"result": "!0",
 						"result_type": "rc"
 					}
@@ -7962,7 +7828,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep logingracetime |  grep -Ei '^\\s*LoginGraceTime\\s+([1-9]|[1-5][0-9]|60)\b'",
+						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep logingracetime |  grep -Ei '^\\s*LoginGraceTime\\s+([1-9]|[1-5][0-9]|60)\\b'",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -8036,7 +7902,7 @@
 								"comment": "entry exists already"
 							}
 						],
-						"cmd": "sed -i \"s/Banner.*/Banner \/etc\/issue.net/\" /etc/ssh/sshd_config",
+						"cmd": "sed -i \"s/Banner.*/Banner /etc/issue.net/\" /etc/ssh/sshd_config",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -8245,10 +8111,9 @@
 								"result": "0"
 							}
 						],
-						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep -i maxsessions | grep -iE 'MaxSessions\\s+([1-9]|10)\\b",
+						"cmd": "sshd -T -C user=root -C host=\"$(hostname)\" -C addr=\"$(grep $(hostname) /etc/hosts | awk '{print $1}')\" | grep -i maxsessions | grep -iE 'MaxSessions\\s+[1-4]\\b'",
 						"result": "0",
-						"result_type": "rc",
-						"comment": "Control says 4 or less but audit says 10 or less so conflicting here."
+						"result_type": "rc"
 					},
 					{
 						"applicable_checks": [
@@ -8258,7 +8123,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep -Ei '^\\s*MaxSessions\\s+(1[1-9]|[2-9][0-9]|[1-9][0-9][0-9]+)' /etc/ssh/sshd_config",
+						"cmd": "grep -Ei '^\\s*MaxSessions\\s+([5-9]|[1-9][0-9]+)' /etc/ssh/sshd_config",
 						"result": "!0",
 						"result_type": "rc"
 					}
@@ -8273,7 +8138,7 @@
 								"comment": "entry exists already"
 							}
 						],
-						"cmd": "sed -i \"s/MaxSessions.*/MaxSessions 10/\" /etc/ssh/sshd_config",
+						"cmd": "sed -i \"s/MaxSessions.*/MaxSessions 4/\" /etc/ssh/sshd_config",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -8286,7 +8151,7 @@
 								"comment": "entry does not exist yet."
 							}
 						],
-						"cmd": "echo 'MaxSessions 10' >> /etc/ssh/sshd_config",
+						"cmd": "echo 'MaxSessions 4' >> /etc/ssh/sshd_config",
 						"result": "0",
 						"result_type": "rc"
 					}
@@ -8354,8 +8219,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.3.2",
@@ -8381,8 +8245,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.3.3",
@@ -8438,8 +8301,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.4.1",
@@ -8495,8 +8357,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.4.2",
@@ -8528,8 +8389,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.4.3",
@@ -8549,8 +8409,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.4.4",
@@ -8582,8 +8441,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.1.1",
@@ -8615,8 +8473,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.1.2",
@@ -8648,8 +8505,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.1.3",
@@ -8681,8 +8537,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.1.4",
@@ -8714,8 +8569,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.1.5",
@@ -8735,8 +8589,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.2",
@@ -8756,8 +8609,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.3",
@@ -8777,8 +8629,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.4",
@@ -8798,8 +8649,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.5.5",
@@ -8836,8 +8686,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.6",
@@ -8857,8 +8706,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "5.7",
@@ -8890,8 +8738,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.1",
@@ -8912,8 +8759,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.2",
@@ -8928,7 +8774,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/passwd | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/passwd 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -8940,13 +8786,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/passwd | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/passwd | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.3",
@@ -8961,7 +8806,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/passwd- | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/passwd- 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -8973,13 +8818,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/passwd- | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/passwd- | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.4",
@@ -8994,7 +8838,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/shadow | grep 0",
+						"cmd": "bash ./scripts/check_mode.sh /etc/shadow 0",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9006,13 +8850,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/shadow | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/shadow | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.5",
@@ -9027,7 +8870,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/shadow- | grep 0",
+						"cmd": "bash ./scripts/check_mode.sh /etc/shadow- 0",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9039,13 +8882,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/shadow- | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/shadow- | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.6",
@@ -9060,7 +8902,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/gshadow | grep 0",
+						"cmd": "bash ./scripts/check_mode.sh /etc/gshadow 0",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9072,13 +8914,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/gshadow | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/gshadow | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.7",
@@ -9093,7 +8934,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/gshadow- | grep 0",
+						"cmd": "bash ./scripts/check_mode.sh /etc/gshadow- 0",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9105,13 +8946,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/gshadow- | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/gshadow- | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.8",
@@ -9126,7 +8966,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/group | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/group 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9138,13 +8978,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/group | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/group | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.9",
@@ -9159,7 +8998,7 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%a' /etc/group- | grep 644",
+						"cmd": "bash ./scripts/check_mode.sh /etc/group- 644",
 						"result": "0",
 						"result_type": "rc"
 					},
@@ -9171,13 +9010,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "stat -c '%u:%g' /etc/group- | grep '0:0'",
+						"cmd": "stat -c '%u:%g' /etc/group- | grep -qx '0:0'",
 						"result": "0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.10",
@@ -9197,8 +9035,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.11",
@@ -9218,8 +9055,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.12",
@@ -9239,8 +9075,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.13",
@@ -9260,8 +9095,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.1.14",
@@ -9281,8 +9115,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.1",
@@ -9302,8 +9135,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.2",
@@ -9318,13 +9150,12 @@
 								"result": "0"
 							}
 						],
-						"cmd": "grep -P '^\\+[^:\n\r]*:' /etc/passwd",
+						"cmd": "grep -P '^\\+[^:\\n\\r]*:' /etc/passwd",
 						"result": "!0",
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.3",
@@ -9344,8 +9175,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.4",
@@ -9365,8 +9195,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.5",
@@ -9386,8 +9215,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.6",
@@ -9407,8 +9235,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.7",
@@ -9428,8 +9255,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.8",
@@ -9449,8 +9275,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.9",
@@ -9470,8 +9295,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.10",
@@ -9491,8 +9315,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.11",
@@ -9512,8 +9335,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.12",
@@ -9533,13 +9355,12 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.13",
 				"level": "1",
-				"description": "Ensure users' .netrc Files are not group or world accessible (Automated)",
+				"description": "Ensure no users have .rhosts files (Automated)",
 				"audits": [
 					{
 						"applicable_checks": [
@@ -9554,8 +9375,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.14",
@@ -9575,29 +9395,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
-			},
-			{
-				"id": "6.2.15",
-				"level": "1",
-				"description": "Ensure no duplicate UIDs exist (Automated)",
-				"audits": [
-					{
-						"applicable_checks": [
-							{
-								"cmd": "test -r /etc/passwd",
-								"result_type": "rc",
-								"result": "0"
-							}
-						],
-						"cmd": "bash ./scripts/6_2_14_audit.sh",
-						"result": "0",
-						"result_type": "rc"
-					}
-				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.15",
@@ -9617,8 +9415,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.16",
@@ -9638,8 +9435,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.17",
@@ -9659,8 +9455,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.18",
@@ -9680,8 +9475,7 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.19",
@@ -9713,8 +9507,7 @@
 						"result_type": "stdout"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			},
 			{
 				"id": "6.2.20",
@@ -9734,11 +9527,8 @@
 						"result_type": "rc"
 					}
 				],
-				"remediations": [
-				]
+				"remediations": []
 			}
 		]
 	}
 }
-
-

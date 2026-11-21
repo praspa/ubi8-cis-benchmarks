@@ -1,19 +1,17 @@
 #!/bin/bash
+# Check PASS_MAX_DAYS in /etc/login.defs (ignores comments).
 
-RC=0
+value=$(awk '/^[[:space:]]*PASS_MAX_DAYS[[:space:]]+[0-9]+/ {v=$2} END {print v}' /etc/login.defs)
 
-pass_max_days=$(grep PASS_MAX_DAYS /etc/login.defs | grep -oE '[0-9]+')
-
-if [ $? -ne 0 ]; then
+if [ -z "${value}" ]; then
     echo "No PASS_MAX_DAYS found in /etc/login.defs"
-    RC=1
-    exit $RC
+    exit 1
 fi
 
-if [ ${pass_max_days} -gt 365 ]; then
-    echo "PASS_MAX_DAYS configuration in /etc/login.defs is greater than 365."
-    RC=1
+if [ "${value}" -gt 365 ]; then
+    echo "PASS_MAX_DAYS in /etc/login.defs is ${value}; required: 365 or less."
+    exit 1
 fi
 
-
-exit $RC
+echo "PASS_MAX_DAYS in /etc/login.defs is ${value}."
+exit 0
